@@ -17,6 +17,7 @@
                 <th scope="col">Costumer Details</th>
                 <th scope="col">Number of products</th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -24,12 +25,13 @@
             {
                 var item = Model[i];
 
-                <tr>
-                    <th scope="row">@(i+1)</th>
-                    <td>@item.User.Email</td>
-                    <td>@item.ProductInOrders.Count()</td>
-                    <td><a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Details</a></td>
-                </tr>
+            <tr>
+                <th scope="row">@(i+1)</th>
+                <td>@item.User.Email</td>
+                <td>@item.ProductInOrders.Count()</td>
+                <td><a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id">Details</a></td>
+                <td><a class="btn btn-outline-secondary" asp-action="CreateInvoice" asp-route-id="@item.Id">Create Invoice</a></td>
+            </tr>
 
             }
         </tbody>
