@@ -1,4 +1,5 @@
-﻿using EShopAdminApplication.Models;
+﻿using ClosedXML.Excel;
+using EShopAdminApplication.Models;
 using GemBox.Document;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -56,6 +57,53 @@ namespace EShopAdminApplication.Controllers
 
 
             return View(result);
+        }
+        [HttpGet]
+        public FileContentResult ExportAllOrders()
+        {
+            string fileName = "Orders.xlsx";
+            string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+            using(var workbook = new XLWorkbook())
+            {
+                IXLWorksheet worksheet = workbook.Worksheets.Add("All Orders");
+
+                worksheet.Cell(1, 1).Value = "Order Id";
+                worksheet.Cell(1, 2).Value = "Costumer Email";
+
+
+                HttpClient client = new HttpClient();
+
+
+                string URI = "https://localhost:44309/api/Admin/GetOrders";
+
+                HttpResponseMessage responseMessage = client.GetAsync(URI).Result;
+
+                var result = responseMessage.Content.ReadAsAsync<List<Order>>().Result;
+
+                for (int i = 1; i <= result.Count(); i++)
+                {
+                    var item = result[i-1];
+
+                    worksheet.Cell(i+1, 1).Value = item.Id.ToString();
+                    worksheet.Cell(i + 1, 2).Value = item.User.Email;
+
+                    for (int p = 0; p < item.ProductInOrders.Count(); p++)
+                    {
+                        worksheet.Cell(1, p+3).Value = "Product-" + (p+1);
+                        worksheet.Cell(i + 1, p + 3).Value = item.ProductInOrders.ElementAt(p).OrderedProduct.ProductName;
+                    }
+                }
+
+                using(var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    return File(content, contentType, fileName);
+                }
+
+            }
         }
 
         public FileContentResult CreateInvoice(Guid id)
